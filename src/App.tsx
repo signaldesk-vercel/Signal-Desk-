@@ -1,8 +1,14 @@
 import { Component, useEffect, useMemo, useState } from 'react';
 import { SignIn, SignUp, useAuth, useUser } from '@clerk/react';
-import { api as appApi } from '@appdeploy/client';
 let clerkTokenGetter: (() => Promise<string | null>) | null = null;
-const api={post:async(url:string,data:any={})=>appApi.post(url,{...data,clerkToken:await clerkTokenGetter?.()})};
+const api={post:async(url:string,data:any={})=>{
+ const token=await clerkTokenGetter?.();
+ const payload={...data,clerkToken:token};
+ const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}: {})},body:JSON.stringify(payload)});
+ const out=await r.json().catch(()=>({message:'Request failed'}));
+ if(!r.ok)throw new Error(out?.message||'Request failed');
+ return {data:out};
+}};
 import { Activity, ArrowDownRight, ArrowUpRight, BarChart3, Bot, Check, ChevronRight, CircleDollarSign, CreditCard, Download, FileText, FileUp, Globe2, HelpCircle, Home, Inbox, Languages, Menu, MessageCircle, MoreHorizontal, Plus, Search, Send, Settings, Sparkles, Target, TrendingUp, Users, X, Zap, UserCircle, Lock, Mail, Play, ShieldCheck } from 'lucide-react';
 
 type Page='Overview'|'How SignalDesk Works'|'Business Mentor'|'Money Center'|'Growth Journey'|'Conversations'|'Customers'|'Smart Action Center'|'AI Reply Assistant'|'Insights Dashboard'|'Export & Reports'|'Search'|'Social Intelligence'|'Settings'|'My Profile';
