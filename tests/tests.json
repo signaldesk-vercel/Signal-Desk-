@@ -1,0 +1,59 @@
+[
+  {
+    "name": "Capture a real file and create a business signal",
+    "sanity": true,
+    "viewport": "desktop",
+    "covers": ["drag-and-drop file conversion", "PDF/TXT/spreadsheet conversion", "file persistence", "AI understanding", "conversation creation"],
+    "description": "Verifies a supported business document can be dropped, converted, and turned into a real workspace signal.",
+    "steps": ["Open Capture signal", "Drop a supported PDF, TXT, CSV, XLS or XLSX file", "Verify the converted filename and text appear", "Submit Understand & create actions", "Open Conversations"],
+    "expected": "The converted document context is visible and a real conversation signal is created."
+  },
+  {
+    "name": "Enter Early Access through the glass dashboard 7-day trial landing page",
+    "viewport": "mobile",
+    "covers": ["Clerk registration flow", "registration redirect", "auth intent persistence", "uploaded logo", "7-day trial promotion", "background video treatment", "glass dashboard hero", "soft leaf framing", "responsive landing layout", "phone mockup UI containment"],
+    "description": "Verifies the public landing page promotes the 7-day trial with a contained glass dashboard hero and responsive visual framing.",
+    "steps": ["Open the public landing page", "Verify the 7-day trial CTA and glass dashboard hero with soft leaf framing are visible", "Tap Start 7-day trial", "Complete Clerk registration"],
+    "expected": "The trial offer is clearly presented, the hero visual stays contained without floating cards, the phone mockup UI remains contained and readable on mobile, and registration opens the private SignalDesk workspace."
+  },
+  {
+    "name": "Use Business Mentor as a chat assistant",
+    "viewport": "mobile",
+    "covers": ["AI Business Mentor chat interface", "mentor composer", "mentor conversation history", "AI fallback", "mobile mentor layout"],
+    "description": "Verifies the Business Mentor supports a conversational thread and follow-up questions.",
+    "steps": ["Open Business Mentor", "Tap a starter question", "Submit a follow-up question"],
+    "expected": "User and assistant messages appear in a clear chat thread and the follow-up is answered."
+  },
+  {
+    "name": "Open the Paddle monthly checkout with SignalDesk metadata",
+    "viewport": "desktop",
+    "covers": ["Paddle billing setup", "monthly subscription checkout", "Paddle client-token initialization", "Paddle price configuration", "Paddle checkout custom data"],
+    "description": "Verifies the SignalDesk Pro billing control opens the configured monthly Paddle price and attaches the signed-in SignalDesk user identifier as checkout metadata.",
+    "steps": ["Open Settings", "Find SignalDesk Pro billing", "Click Upgrade"],
+    "expected": "Paddle Checkout opens for the configured monthly price with SignalDesk user metadata attached."
+  },
+  {
+    "name": "Review a public social profile",
+    "viewport": "desktop",
+    "covers": ["Social Intelligence platform selection", "social URL input", "social analysis", "social review results", "public social review API"],
+    "description": "Verifies a user can choose a social platform, submit a public profile URL, and receive a rendered review.",
+    "steps": ["Open Social Intelligence", "Select TikTok", "Enter a public TikTok URL", "Click Analyze"],
+    "expected": "A review result or clear public-page access error is shown without invented page facts, and a Growth plan view exposes grounded next-step suggestions when the AI can establish them."
+  },
+  {
+    "name": "Use a social username on mobile",
+    "viewport": "mobile",
+    "covers": ["social username input", "platform-specific profile URL", "mobile Social Intelligence layout"],
+    "description": "Verifies username mode builds the selected platform profile URL and keeps the form usable on mobile.",
+    "steps": ["Open Social Intelligence", "Select Instagram", "Choose Username", "Enter a public username", "Tap Analyze"],
+    "expected": "SignalDesk builds the public Instagram profile URL and shows analysis or a clear access error."
+  },
+  {
+    "name": "Reject an invalid file safely",
+    "viewport": "mobile",
+    "covers": ["file type validation", "file size guardrail", "user-visible upload errors"],
+    "description": "Verifies unsupported or oversized files do not create a workspace signal.",
+    "steps": ["Open Capture signal", "Choose an unsupported or oversized file"],
+    "expected": "A clear file error appears and no conversation is created."
+  }
+]
