@@ -8,8 +8,8 @@ import crypto from 'node:crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY! });
-const PRICE_ID='pri_01m3pxczzqkv25fj4mhz66kjmb';
-const PRODUCT_ID='pro_01m3px99f58awgx0k8hsd3rd4q';
+const PRICE_ID=String(process.env.PADDLE_PRICE_ID||'pri_01m3pxczzqkv25fj4mhz66kjmb').trim();
+const PRODUCT_ID=String(process.env.PADDLE_PRODUCT_ID||'pro_01m3px99f58awgx0k8hsd3rd4q').trim();
 
 const send=(res:VercelResponse,status:number,data:any)=>res.status(status).json(data);
 const tokenOf=(body:any,req:VercelRequest)=>String(body?.clerkToken||String(req.headers.authorization||'').replace(/^Bearer\s+/i,'')).trim();
@@ -52,11 +52,11 @@ async function convertFile(name:string,mime:string,data:string){
  if(lower.endsWith('.txt')||lower.endsWith('.md')||mime.startsWith('text/'))return buf.toString('utf8').trim();
  throw new Error('Unsupported file type. Use PDF, TXT, CSV, XLS, XLSX, DOCX or Markdown.');
 }
-async function billingConfig(res:VercelResponse){const key=String(process.env.PADDLE_API_KEY||'').replace(/^Bearer\s+/i,'').trim();const token=String(process.env.PADDLE_CLIENT_TOKEN||'').replace(/^Bearer\s+/i,'').trim();const environment=/^pdl_sdbx_/.test(key)||token.startsWith('test_')?'sandbox':'live';return send(res,200,{configured:Boolean(key&&token),clientToken:token,priceId:PRICE_ID,productId:PRODUCT_ID,environment})}
+async function billingConfig(res:VercelResponse){const key=String(process.env.PADDLE_API_KEY||'').replace(/^Bearer\s+/i,'').trim();const token=String(process.env.PADDLE_CLIENT_TOKEN||'').replace(/^Bearer\s+/i,'').trim();const environment=String(process.env.PADDLE_ENVIRONMENT||'').toLowerCase()==='sandbox'||token.startsWith('test_')?'sandbox':'live';return send(res,200,{configured:Boolean(key&&token),clientToken:token,priceId:PRICE_ID,productId:PRODUCT_ID,environment})}
 async function paddleValidate(res:VercelResponse){
  const key=String(process.env.PADDLE_API_KEY||'').replace(/^Bearer\s+/i,'').trim();if(!key)return send(res,200,{ok:false,code:'PADDLE_API_KEY_MISSING',message:'Paddle API key is missing'});
  const token=String(process.env.PADDLE_CLIENT_TOKEN||'').replace(/^Bearer\s+/i,'').trim();if(!token)return send(res,200,{ok:false,code:'PADDLE_CLIENT_TOKEN_MISSING',message:'Paddle client token is missing'});
- const env=token.startsWith('test_')?'sandbox':'live';const base=env==='sandbox'?'https://sandbox-api.paddle.com':'https://api.paddle.com';
+ const env=String(process.env.PADDLE_ENVIRONMENT||'').toLowerCase()==='sandbox'||token.startsWith('test_')?'sandbox':'live';const base=env==='sandbox'?'https://sandbox-api.paddle.com':'https://api.paddle.com';
  try{const r=await fetch(base+'/prices/'+PRICE_ID,{headers:{Authorization:'Bearer '+key,'Paddle-Version':'1',Accept:'application/json'}});const d:any=await r.json();if(!r.ok)return send(res,200,{ok:false,code:String(d?.error?.code||('HTTP_'+r.status)),status:r.status,environment:env,message:String(d?.error?.detail||'Paddle price validation failed')});return send(res,200,{ok:true,environment:env,priceId:d?.data?.id||PRICE_ID,productId:d?.data?.product_id||''})}catch(e:any){return send(res,200,{ok:false,code:'PADDLE_VALIDATION_ERROR',message:e?.message||'Could not validate Paddle configuration'})}
 }
 async function paddleWebhook(req:VercelRequest,res:VercelResponse){
