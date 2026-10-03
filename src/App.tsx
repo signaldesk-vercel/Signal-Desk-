@@ -4,9 +4,10 @@ let clerkTokenGetter: (() => Promise<string | null>) | null = null;
 const api={post:async(url:string,data:any={})=>{
  const token=await clerkTokenGetter?.();
  const payload={...data,clerkToken:token};
- const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}: {})},body:JSON.stringify(payload)});
- const out=await r.json().catch(()=>({message:'Request failed'}));
- if(!r.ok)throw new Error(out?.message||'Request failed');
+ const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(payload)});
+ const raw=await r.text();
+ let out:any; try{out=JSON.parse(raw)}catch{out={message:`Request failed (${r.status})`}}
+ if(!r.ok)throw new Error(out?.message||`Request failed (${r.status})`);
  return {data:out};
 }};
 import { Activity, ArrowDownRight, ArrowUpRight, BarChart3, Bot, Check, ChevronRight, CircleDollarSign, CreditCard, Download, FileText, FileUp, Globe2, HelpCircle, Home, Inbox, Languages, Menu, MessageCircle, MoreHorizontal, Plus, Search, Send, Settings, Sparkles, Target, TrendingUp, Users, X, Zap, UserCircle, Lock, Mail, Play, ShieldCheck } from 'lucide-react';
@@ -30,13 +31,6 @@ function AnimatedNumber({value}:{value:string|number}){const target=String(value
 const Stat=({label,value,icon}:{label:string;value:string|number;icon:React.ReactNode})=><div className="stat"><span className="staticon">{icon}</span><small>{label}</small><strong><AnimatedNumber value={value}/></strong><em>Workspace data</em></div>;
 const PanelHead=({label,title}:{label:string;title:string})=><div className="panelhead"><div><small>{label}</small><h3>{title}</h3></div></div>;
 
-function LoadingScreen({label,detail,retry}:{label:string;detail:string;retry?:()=>void}){return <div className="authpage"><div className="authcard" style={{textAlign:'center'}}><div className="authbrand"><span className="brandmark">S</span><b>SignalDesk</b></div><div className="sectiontag">SIGNALDESK</div><h1>{label}</h1><p>{detail}</p>{retry&&<button className="primary full big" onClick={retry}>Retry</button>}</div></div>}
-
-function Landing({onStart,onLogin}:{onStart:()=>void;onLogin:()=>void}){const [openFaq,setOpenFaq]=useState<number|null>(null);const faqs=[['Is SignalDesk a complicated CRM?','No. It is a calm business workspace built around DROP → UNDERSTAND → ACT.'],['Does SignalDesk use demo customers or fake business numbers?','No. New workspaces start empty and your dashboard is built from the information you add.'],['How does the Business Mentor work?','Ask a business question, paste a customer situation, or work through a real conversation in a ChatGPT-style workspace.'],['Can I review my social presence?','Yes. Social Intelligence lets you choose a platform and review a public profile or page before turning the findings into next actions.'],['Can I use SignalDesk on mobile?','Yes. The interface is responsive and the core workspace is designed for mobile as well as desktop.']];return <div className="landing"><header className="landnav"><div className="brand"><SignalMark className="brandmark"/><div><strong>SignalDesk</strong><small>Business workspace</small></div></div><div className="landlinks"><a href="#how">How it works</a><a href="#features">Features</a><a href="#faq">FAQ</a></div><div className="landnavactions"><button className="landlogin" onClick={onLogin}>Sign in</button><button className="primary" onClick={onStart}>Start free trial <ChevronRight/></button></div></header><section className="landhero"><div className="hero-copy"><div className="eyebrow"><span/> DROP → UNDERSTAND → ACT</div><h1>Business feels lighter when the <em>next move</em> is clear.</h1><p>Bring conversations, actions, money and growth into one calm workspace — so the work feels easier to understand and act on.</p><div className="hero-ctas"><button className="primary big" onClick={onStart}>Start your 7-day trial <ChevronRight/></button><button className="ghost big" onClick={()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}>See how it works <Play/></button></div><div className="proof"><ShieldCheck/> 7-DAY TRIAL · PRIVATE WORKSPACE · NO DEMO DATA</div></div><div className="phonewrap"><div className="phoneglow"/><div className="orb orb1"/><div className="orb orb2"/><div className="hero-badge hero-badge-one"><ShieldCheck/><div><b>Private workspace</b><small>Your data stays yours</small></div></div><div className="phone"><div className="phoneisland"/><div className="phonescreen"><div className="phonetop"><b>SignalDesk</b><span>9:41</span></div><small>OVERVIEW</small><h3>Good morning.</h3><div className="phonestats"><div><small>INCOME</small><b>—</b></div><div><small>ORDERS</small><b>0</b></div><div><small>UNREAD</small><b>0</b></div><div><small>GROWTH</small><b>0%</b></div></div><div className="phonecard"><small>SMART ACTION CENTER</small><h4>No actions yet</h4><p>Your next move appears here when you add a real business signal.</p><div className="phonebutton">CAPTURE SIGNAL</div></div><div className="phonecard slim"><small>GROWTH JOURNEY</small><div className="phonebar"><i/></div></div><div className="phonebottom"><span><Home/></span><i><Users/></i><i><Target/></i><i><BarChart3/></i><i><Menu/></i></div></div></div></div></section><div className="landtrust"><span><ShieldCheck/> Private by design</span><span><Sparkles/> AI-assisted</span><span><Zap/> Clear next actions</span><span><Activity/> Real workspace data</span></div><section id="how" className="landsection"><div className="sectiontag">HOW SIGNALDESK WORKS</div><h2>From signal to action, without the noise.</h2><p className="sectionlead">One calm loop for the work normally scattered across chats, notes, spreadsheets and tools.</p><div className="landsteps"><article className="landstep"><span>01</span><h3>DROP</h3><p>Bring in a customer conversation, meeting transcript, note, screenshot or social message.</p></article><article className="landstep"><span>02</span><h3>UNDERSTAND</h3><p>Turn raw information into useful customer intelligence and business context.</p></article><article className="landstep"><span>03</span><h3>ACT</h3><p>Get practical next actions, replies and growth signals without CRM complexity.</p></article></div></section><section id="features" className="featureband"><div><div className="sectiontag">ONE CALM WORKSPACE</div><h2>Everything connected to the next decision.</h2><p>Conversations, customers, money, growth and AI assistance work together around your actual workspace data.</p><button className="primary" onClick={onStart}>Start your 7-day trial <ChevronRight/></button></div><div className="featuregrid"><div className="featuretile"><Bot/><b>Business Mentor</b><small>Chat with an AI assistant that also teaches you how to think through the business problem.</small></div><div className="featuretile"><MessageCircle/><b>Conversations</b><small>Capture real customer signals and turn them into structured context.</small></div><div className="featuretile"><CircleDollarSign/><b>Money Center</b><small>Track real income, expenses, payments and profit context.</small></div><div className="featuretile"><Target/><b>Smart Action Center</b><small>Keep the next practical action visible instead of buried in notes.</small></div></div></section><section className="showcase-section"><div className="showcase-copy"><div className="sectiontag">SIGNALDESK AI</div><h2>AI Business Mentor</h2><p>Ask a question, paste a situation, or work through a customer conversation. The interface stays focused on one useful thread.</p><div className="showcase-points"><span><Bot/> ChatGPT-style conversation</span><span><Sparkles/> Practical business guidance</span><span><ShieldCheck/> Workspace context only</span></div></div><div className="showcase-card mentor-preview"><div className="showcase-head"><span><Bot/></span><div><small>SIGNALDESK AI</small><b>AI Business Mentor</b></div><i>● online</i></div><div className="preview-body"><div className="preview-message assistant"><small>AI ASSISTANT</small><b>What are you working on?</b><p>Ask about sales, customers, pricing, marketing or a real customer conversation.</p></div><div className="preview-starters"><span>Improve my sales process <ChevronRight/></span><span>What should I focus on this week? <ChevronRight/></span><span>Help me follow up with a customer <ChevronRight/></span></div><div className="preview-composer">Ask SignalDesk AI… <Send/></div></div></div></section><section className="showcase-section reverse"><div className="showcase-copy"><div className="sectiontag">SOCIAL INTELLIGENCE</div><h2>Choose. Review. Grow.</h2><p>Turn a public social profile or page into structured signals and practical next actions.</p><div className="showcase-points"><span><Globe2/> Public page review</span><span><Target/> Growth actions</span><span><Zap/> Content ideas</span></div></div><div className="showcase-card social-preview"><div className="social-flow"><span><b>01</b> Choose platform</span><i/><span><b>02</b> Review public signals</span><i/><span><b>03</b> Grow next actions</span></div><div className="social-preview-step"><small>SELECT SOCIAL MEDIA</small><h3>Choose a platform</h3><div className="preview-platforms"><b>TikTok</b><b>YouTube</b><b>Facebook</b><b>Instagram</b><b>Reddit</b><b>LinkedIn</b><b>X</b></div></div><div className="social-preview-step"><small>PUBLIC URL</small><h3>Add the page you want reviewed</h3><div className="preview-url"><Globe2/><span>https://www.tiktok.com/@user</span><button className="primary">Analyze</button></div></div><div className="preview-ready"><Globe2/><div><b>Ready to turn a profile into a growth plan.</b><span>Start with a public social profile or page.</span></div></div></div></section><section className="drop-showcase"><div className="sectiontag">DROP</div><h2>Drop a real signal. SignalDesk does the sorting.</h2><p>Bring PDFs, notes, spreadsheets, screenshots and conversations into the same calm workspace.</p><div className="drop-preview"><div className="drop-icon"><FileUp/></div><b>Drop files here or browse</b><span>PDF · TXT · Excel · Images · Conversations</span><button className="outline">Browse files</button></div></section><section id="faq" className="landsection premiumfaq"><div className="sectiontag">FAQ</div><h2>A simpler way to run the work.</h2><p className="sectionlead">Short answers before you bring your business into SignalDesk.</p><div className="faqlist">{faqs.map((faq,i)=><button type="button" className={`faqrow ${openFaq===i?'open':''}`} key={faq[0]} onClick={()=>setOpenFaq(openFaq===i?null:i)}><span className="faqcopy"><b>{faq[0]}</b>{openFaq===i&&<p>{faq[1]}</p>}</span><span className="faqtoggle">{openFaq===i?'−':'+'}</span></button>)}</div></section><footer className="landfooter"><span>SignalDesk · DROP → UNDERSTAND → ACT</span><span>7-DAY TRIAL · PRIVATE WORKSPACE</span></footer></div>}
-function Auth({mode,setMode,onBack}:{mode:'login'|'signup';setMode:(m:'login'|'signup')=>void;onBack:()=>void}){
- return <div className="authpage"><div className="authcard authclerk"><div className="authbrand"><span className="brandmark">S</span><b>SignalDesk</b></div><div className="sectiontag">PRIVATE WORKSPACE</div><h1>{mode==='login'?'Welcome back':'Create your workspace'}</h1><p>{mode==='login'?'Sign in to continue to your SignalDesk workspace.':'Start your 7-day trial and keep your workspace private.'}</p><div style={{display:'flex',gap:8,margin:'18px 0',flexWrap:'wrap'}}><button type="button" className={mode==='login'?'primary':'secondary'} onClick={()=>setMode('login')}>Sign in</button><button type="button" className={mode==='signup'?'primary':'secondary'} onClick={()=>setMode('signup')}>Create account</button><button type="button" className="secondary" onClick={onBack}>Back</button></div>{mode==='login'?<SignIn routing="hash" signUpUrl="/" />:<SignUp routing="hash" signInUrl="/" />}</div></div>
-}
-
 function App(){
  const {isLoaded,isSignedIn,getToken,signOut}=useAuth();
  const {user:clerkUser}=useUser();
@@ -57,7 +51,7 @@ function App(){
  const addTransaction=async(type:'income'|'expense')=>{if(!auth)return;const raw=prompt(type==='income'?'Payment amount':'Expense amount');const amount=Number(raw);if(!Number.isFinite(amount)||amount<=0)return;const label=prompt('Description')||'';if(!label.trim())return;try{const r=await api.post('/api/transactions',{token:auth.token,type,label:label.trim(),amount,date:new Date().toISOString().slice(0,10)});setTransactions(x=>[r.data.transaction,...x])}catch(e:any){setErrorMsg(e?.message||'Could not save the transaction.')}};
  const convertFiles=async(fileList:FileList|File[])=>{if(!auth)return;const files=Array.from(fileList).slice(0,5);if(!files.length)return;setLoading(true);setErrorMsg('');const names:string[]=[];let combined='';for(const file of files){try{if(file.size>12*1024*1024)throw new Error('Keep each file under 12 MB.');const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(new Error('Could not read the file.'));reader.readAsDataURL(file)});const r:any=await api.post('/api/files/convert',{token:auth.token,fileName:file.name,mimeType:file.type,data});const result=r?.data||r;if(!result?.text)throw new Error('No readable text found in '+file.name+'.');names.push(file.name);combined+=(combined?'\n\n':'')+'--- '+file.name+' ---\n'+result.text}catch(e:any){setErrorMsg(e?.message||('Could not convert '+file.name+'.'))}}if(names.length){setUploadedFiles(x=>[...x,...names]);setText(x=>x?(x+'\n\n'+combined):combined)}setLoading(false)};
  const exportCSV=()=>{const rows=[['Type','Label','Amount','Date'],...transactions.map(t=>[t.type,t.label,String(t.amount),t.date])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='signaldesk-report.csv';a.click()};
- useEffect(()=>{if(!isSignedIn||!auth)return;let alive=true;setPaddle(null);Promise.allSettled([api.post('/api/billing/config',{}),api.post('/api/billing/validate',{})]).then(results=>{if(!alive)return;const configResult=results[0],validateResult=results[1];if(configResult.status==='rejected')return;const cfg=configResult.value?.data||configResult.value;if(!cfg?.configured||!cfg.clientToken)return;if(validateResult.status==='rejected')return;const check=validateResult.value?.data||validateResult.value;if(!check?.ok)return;setPaddlePriceId(check.priceId||cfg.priceId||'pri_01m3pxczzqkv25fj4mhz66kjmb');const w:any=window;if(w.Paddle){try{if(cfg.environment==='sandbox'&&w.Paddle.Environment)w.Paddle.Environment.set('sandbox');if(!w.Paddle.__signaldeskInitialized){w.Paddle.Initialize({token:cfg.clientToken});w.Paddle.__signaldeskInitialized=true}setPaddle(w.Paddle)}catch{return}return}const script=document.createElement('script');script.src='https://cdn.paddle.com/paddle/v2/paddle.js';script.async=true;script.onload=()=>{if(!alive)return;const Paddle=(window as any).Paddle;if(!Paddle)return;try{if(cfg.environment==='sandbox'&&Paddle.Environment)Paddle.Environment.set('sandbox');Paddle.Initialize({token:cfg.clientToken});Paddle.__signaldeskInitialized=true;setPaddle(Paddle)}catch{return}};document.head.appendChild(script)});return()=>{alive=false}},[isSignedIn,auth?.user.id]);
+ useEffect(()=>{if(!isSignedIn||!auth)return;let alive=true;setPaddle(null);Promise.allSettled([api.post('/api/billing/config',{}),api.post('/api/billing/validate',{})]).then(results=>{if(!alive)return;const configResult=results[0],validateResult=results[1];if(configResult.status==='rejected'){setErrorMsg(configResult.reason?.message||'Could not load Paddle configuration.');return}const cfg=configResult.value?.data||configResult.value;if(!cfg?.configured||!cfg.clientToken){setErrorMsg('Paddle client token is missing on the server.');return}if(validateResult.status==='rejected'){setErrorMsg(validateResult.reason?.message||'Could not verify the Paddle price.');return}const check=validateResult.value?.data||validateResult.value;if(!check?.ok){setErrorMsg(`Paddle price check failed${check?.message?`: ${check.message}`:''}${check?.code?` (${check.code})`:''}.`);return}setPaddlePriceId(check.priceId||cfg.priceId||'pri_01m3pxczzqkv25fj4mhz66kjmb');const w:any=window;if(w.Paddle){try{if(cfg.environment==='sandbox'&&w.Paddle.Environment)w.Paddle.Environment.set('sandbox');if(!w.Paddle.__signaldeskInitialized){w.Paddle.Initialize({token:cfg.clientToken});w.Paddle.__signaldeskInitialized=true}setPaddle(w.Paddle)}catch{setErrorMsg('Paddle could not initialize. Check the client token and environment.')}return}const script=document.createElement('script');script.src='https://cdn.paddle.com/paddle/v2/paddle.js';script.async=true;script.onload=()=>{if(!alive)return;const Paddle=(window as any).Paddle;if(!Paddle){setErrorMsg('Paddle checkout library could not load.');return}try{if(cfg.environment==='sandbox'&&Paddle.Environment)Paddle.Environment.set('sandbox');Paddle.Initialize({token:cfg.clientToken});Paddle.__signaldeskInitialized=true;setPaddle(Paddle)}catch{setErrorMsg('Paddle could not initialize. Check the client token and environment.')}};script.onerror=()=>{if(alive)setErrorMsg('Paddle checkout library could not load.');};document.head.appendChild(script);}).catch(()=>{if(alive)setErrorMsg('Could not verify Paddle configuration.');});return()=>{alive=false}},[isSignedIn,auth?.user.id]);
  const openPaddleCheckout=()=>{if(!paddle){setErrorMsg('Paddle checkout is still initializing. Please wait a moment and try again.');return}try{paddle.Checkout.open({items:[{priceId:paddlePriceId,quantity:1}],customer:auth?.user.email?{email:auth.user.email}:undefined,customData:{signaldesk_user_id:auth?.user.id||''},settings:{displayMode:'overlay',theme:'light',locale:'en'}})}catch(e:any){setErrorMsg(e?.message||'Paddle checkout could not open.')}};
  if(!isLoaded)return <LoadingScreen label="Checking your session" detail="Connecting to your private SignalDesk workspace."/>;
  if(!isSignedIn){if(landing&&sessionStorage.getItem('signaldesk_auth_intent')!=='1')return <Landing onStart={()=>{sessionStorage.setItem('signaldesk_auth_intent','1');setAuthMode('signup');setLanding(false)}} onLogin={()=>{sessionStorage.setItem('signaldesk_auth_intent','1');setAuthMode('login');setLanding(false)}}/>;return <Auth mode={authMode} setMode={setAuthMode} onBack={()=>setLanding(true)}/>;}
@@ -207,9 +201,138 @@ function Social(){
     </div>
   </section>
 }
-
-export default App;
-
 function SettingsPage({currency,setCurrency,token,onUpgrade,paddleReady,onSocial}:any){return <section className="pagegrid one"><div className="intro"><div><small>SETTINGS</small><h2>Make SignalDesk yours.</h2><p>Account, currency, integrations and language preferences.</p></div></div><div className="panel settings"><Setting icon={<CircleDollarSign/>} title="Currency" text="Used in Money Center"><select value={currency} onChange={async e=>{setCurrency(e.target.value);try{await api.post('/api/profile',{token,currency:e.target.value})}catch{}}}><option>USD</option><option>LKR</option><option>EUR</option><option>GBP</option></select></Setting><Setting icon={<CreditCard/>} title="SignalDesk Pro" text="Monthly Paddle subscription"><div className="billingrow"><span className={paddleReady?'billingok':'billingwait'}>{paddleReady?<><Check/> Checkout ready</>:<>Paddle setup needed</>}</span><button className="primary" onClick={onUpgrade}><CreditCard/> Upgrade</button></div></Setting><Setting icon={<Languages/>} title="Language" text="Interface language"><span className="pill">English</span></Setting><Setting icon={<Zap/>} title="Social intelligence" text="Review public social profiles and pages"><button className="outline" onClick={onSocial}><Globe2/> Open Social Intelligence</button></Setting></div></section>}
 function Setting({icon,title,text,children}:any){return <div className="setting"><span className="settingicon">{icon}</span><div><b>{title}</b><small>{text}</small></div><div className="settingright">{children}</div></div>}
 function Profile({user,onLogout}:{user:User;onLogout:()=>void}){return <section className="pagegrid one"><div className="intro"><div><small>MY PROFILE</small><h2>Your SignalDesk account.</h2><p>Manage your account identity and sign out from this device.</p></div><button className="outline" onClick={onLogout}>Sign out</button></div><div className="panel profilecard"><span className="profilebig">{initials(user.name)}</span><div><h3>{user.name}</h3><p>{user.email}</p><small>Private workspace</small></div></div></section>}
+
+class AppBoundary extends Component<any, {hasError:boolean;message:string}>{state={hasError:false,message:''};static getDerivedStateFromError(error:any){return {hasError:true,message:error?.message||'Unexpected application error'}}componentDidCatch(error:any){console.error('SignalDesk render error',error)}render(){if(this.state.hasError)return <div className="authpage"><div className="authcard"><div className="authbrand"><SignalMark className="brandmark"/><b>SignalDesk</b></div><div className="sectiontag">RECOVERY</div><h1>SignalDesk needs a refresh.</h1><p>We hit an unexpected display error while opening your workspace. Your data has not been replaced with demo data.</p><div className="autherror">{this.state.message}</div><button className="primary full big" style={{marginTop:14}} onClick={()=>window.location.reload()}>Refresh SignalDesk</button><button className="switchauth" onClick={()=>{localStorage.removeItem('signaldesk_auth');window.location.reload()}}>Sign in again</button></div></div>;return this.props.children}}
+
+export default function RootApp(){return <AppBoundary><App/></AppBoundary>}
+
+function LoadingScreen({label,detail,retry}:{label:string;detail:string;retry?:()=>void}){return <div className="loadingpage"><div className="loadingorb loadingorb-one"/><div className="loadingorb loadingorb-two"/><div className="loadingcard"><div className="loadingbrand"><SignalMark className="brandmark"/><b>SignalDesk</b></div><div className="loadingmark"><i/><i/><i/></div><div className="sectiontag">SIGNALDESK</div><h1>{label}…</h1><p>{detail}</p><div className="loadingline"><span/></div>{retry&&<button className="switchauth loadingretry" onClick={retry}>Taking too long? Retry</button>}</div></div>}
+function Landing({onStart,onLogin}:{onStart:()=>void;onLogin:()=>void}) {
+  const [faq,setFaq]=useState<number|null>(null);
+  const beginAuth=(mode:'signup'|'login')=>{sessionStorage.setItem('signaldesk_auth_intent','1');if(mode==='signup')onStart();else onLogin()};
+  const scrollTo=(id:string)=>document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
+  return <div className="landing landing-v28">
+    <nav className="landnav landnav-v28">
+      <div className="landbrand"><SignalMark className="brandmark"/><b>SignalDesk</b></div>
+      <div className="landlinks"><a href="#how">How it works</a><a href="#features">Features</a><a href="#trial">7-day trial</a><a href="#faq">FAQ</a></div>
+      <div className="landnavactions"><span className="trial-nav-pill">7 DAYS TO EXPLORE</span><button className="landlogin" onClick={()=>beginAuth('login')}>Log in</button><button className="primary" onClick={()=>beginAuth('signup')}>Start 7-day trial <ChevronRight/></button></div>
+    </nav>
+
+    <section id="trial" className="landhero hero-v29">
+      <video className="land-video land-video-v29" autoPlay muted loop playsInline preload="metadata" aria-hidden="true">
+        <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4"/>
+      </video>
+      <div className="land-video-shade land-video-shade-v29"/>
+      <div className="hero-grid-glow"/>
+      <span className="hero-leaf leaf-l1" aria-hidden="true"/>
+      <span className="hero-leaf leaf-l2" aria-hidden="true"/>
+      <span className="hero-leaf leaf-l3" aria-hidden="true"/>
+      <span className="hero-leaf leaf-r1" aria-hidden="true"/>
+      <span className="hero-leaf leaf-r2" aria-hidden="true"/>
+      <span className="hero-leaf leaf-r3" aria-hidden="true"/>
+      <div className="hero-copy hero-copy-v29">
+        <div className="eyebrow"><span/> 7-DAY TRIAL · PRIVATE WORKSPACE</div>
+        <h1>Business feels lighter when the <em>next move is clear.</em></h1>
+        <p>Bring conversations, actions, money and growth into one calm workspace — so the work feels easier to understand and act on.</p>
+        <div className="hero-ctas">
+          <button className="primary big" onClick={()=>beginAuth('signup')}>Start your 7-day trial <ChevronRight/></button>
+          <button className="ghost big" onClick={()=>scrollTo('how')}><Play/> See how it works</button>
+        </div>
+        <span className="hero-note-v29"><ShieldCheck/> Private workspace · Starts with your real data</span>
+      </div>
+      <div className="hero-phone-v29" aria-hidden="true">
+        <div className="hero-phone-glow-v29"/>
+        <PhoneMock/>
+      </div>
+    </section>
+
+
+    <section id="how" className="landsection workflow-v28">
+      <div className="sectiontag">DROP → UNDERSTAND → ACT</div>
+      <div className="section-heading-v28"><div><h2>One loop for the work that keeps piling up.</h2><p className="sectionlead">SignalDesk is built around what actually happens in a growing business: a message arrives, something matters, and someone needs to decide what happens next.</p></div><span className="section-index">01 / 03</span></div>
+      <div className="landsteps landsteps-v28"><LandStep n="01" title="Drop" text="Paste a customer message, meeting note, transcript, document or social signal."/><LandStep n="02" title="Understand" text="See the useful context: what happened, what matters and what deserves attention."/><LandStep n="03" title="Act" text="Draft a reply, follow up, track money and keep the next move visible."/></div>
+    </section>
+
+    <section className="visualband-v28">
+      <div className="image-panel-v28"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1400&q=80&auto=format&fit=crop" alt="Modern technology workspace" loading="lazy"/><div className="image-overlay-v28"><span>CONNECTED BUSINESS CONTEXT</span><b>From signal to action — without the clutter.</b></div></div>
+      <div className="visual-copy-v28"><div className="sectiontag">A CALMER SYSTEM</div><h2>Everything useful, closer together.</h2><p>Keep customers, conversations, actions, money, growth and AI assistance in one workspace so you spend less time searching and more time deciding.</p><div className="mini-proof-grid"><div><b>01</b><span>Customer context</span></div><div><b>02</b><span>Next actions</span></div><div><b>03</b><span>Money & growth</span></div><div><b>04</b><span>AI assistance</span></div></div><button className="ghost big" onClick={()=>scrollTo('features')}>Explore the workspace <ChevronRight/></button></div>
+    </section>
+
+    <section id="features" className="featureband featureband-v28">
+      <div><div className="sectiontag">WHAT YOU CAN DO</div><h2>Less switching.<br/><em>More knowing.</em></h2><p>Each part of SignalDesk is connected to the same business context — so the product feels like one workspace, not ten disconnected tools.</p><button className="primary big" onClick={()=>beginAuth('signup')}>Try it for 7 days <ChevronRight/></button></div>
+      <div className="featuregrid featuregrid-v28">
+        {[
+          ['Customer intelligence','See the customer context behind the conversation.'],
+          ['Smart action center','Keep the next useful action visible.'],
+          ['AI reply assistant','Draft replies grounded in the real thread.'],
+          ['Money center','Track real income, expenses and payments.'],
+          ['Growth journey','See progress from the records you actually create.'],
+          ['Business mentor','Ask business questions in a ChatGPT-style workspace.']
+        ].map(([title,desc],i)=><div className="featuretile featuretile-v28" key={title}><span>0{i+1}</span><Sparkles/><b>{title}</b><small>{desc}</small></div>)}
+      </div>
+    </section>
+
+    <section className="landsection trialstory-v28">
+      <div className="sectiontag">WHY START WITH A TRIAL?</div>
+      <h2>Seven days is enough to make the workflow feel real.</h2>
+      <p className="sectionlead">Do not build a perfect system first. Bring one real customer signal, one conversation or one business note into SignalDesk and let the workspace grow from there.</p>
+      <div className="trialcards-v28">
+        <div><span>01</span><b>Bring one real signal</b><p>Start with the thing currently sitting in your inbox, notes or messages.</p></div>
+        <div><span>02</span><b>See the next action</b><p>Turn context into a clearer priority, reply or follow-up.</p></div>
+        <div><span>03</span><b>Build the habit</b><p>Use the workspace for seven days and see what becomes easier.</p></div>
+      </div>
+    </section>
+
+    <section className="motionband-v28">
+      <div className="motion-video-card"><video autoPlay muted loop playsInline preload="metadata" aria-hidden="true"><source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4"/></video><div className="motion-shade"/><div className="motion-copy"><span>REAL WORK · LESS FRICTION</span><h2>A business workspace that feels alive, not overloaded.</h2><p>Quiet surfaces, focused actions and motion that guides attention without getting in the way.</p></div></div>
+    </section>
+
+    <section id="faq" className="landsection faq faq-v28">
+      <div className="sectiontag">FAQ</div><h2>Simple answers before you start.</h2>
+      {['What is included in the 7-day trial?','Will my workspace contain demo data?','What can I drop into SignalDesk?','What happens after the trial?'].map((q,i)=><button className="faqrow faqrow-v28" key={q} onClick={()=>setFaq(faq===i?null:i)}><div><b>{q}</b>{faq===i&&<p>{i===0?'You can explore the SignalDesk workflow with your own business context during the 7-day trial.':i===1?'No. New workspaces start empty. Only information you add, import or connect is used to build your workspace.':i===2?'You can add customer conversations, meeting notes, transcripts and supported documents or spreadsheets.':'Paddle shows the applicable billing and renewal terms in checkout before you confirm the subscription.'}</p>}</div><span>{faq===i?'−':'+'}</span></button>)}
+    </section>
+
+    <section className="landsection landfinal landfinal-v28">
+      <div><div className="sectiontag">YOUR NEXT 7 DAYS</div><h2>Start with the business you have today.</h2><p>Bring one real signal into SignalDesk and see what becomes clearer.</p></div>
+      <button className="primary big" onClick={()=>beginAuth('signup')}>Start 7-day trial <ChevronRight/></button>
+    </section>
+    <footer className="landfooter landfooter-v28"><div><b>SignalDesk</b><span>DROP → UNDERSTAND → ACT</span></div><span>Turn real business signals into clear next actions.</span><span>Built by Nexagen Studio</span></footer>
+  </div>
+}
+function LandStep({n,title,text}:any){return <div className="landstep"><span>{n}</span><h3>{title}</h3><p>{text}</p></div>}
+function PhoneMock(){
+  const [pressed,setPressed]=useState(false);
+  const reset=()=>setPressed(false);
+  return <div className={`phonewrap premiumphonewrap phone-interactive ${pressed?'phone-pressed':''}`} onPointerDown={()=>setPressed(true)} onPointerUp={reset} onPointerCancel={reset} onPointerLeave={reset} role="img" aria-label="Interactive iPhone-inspired SignalDesk preview">
+    <div className="phone-shadow"/>
+    <div className="phone-aura"/>
+    <div className="phone">
+      <div className="phoneisland"/>
+      <div className="phonebutton-side phonebutton-side-one"/>
+      <div className="phonebutton-side phonebutton-side-two"/>
+      <div className="phonescreen">
+        <div className="phone-glass"/>
+        <div className="phonetop"><span className="phonebrand"><SignalMark className="signal-mark-mini"/><b>SignalDesk</b></span><span className="phone-time">9:41</span></div>
+        <div className="phonewelcome"><small>OVERVIEW</small><h3>Business at a glance</h3><span>Everything important, one calm view.</span></div>
+        <div className="phonestats">
+          <div><small>INCOME</small><b>$—</b><span>Awaiting data</span></div>
+          <div><small>CUSTOMERS</small><b>0</b><span>No customers yet</span></div>
+        </div>
+        <div className="phonecard actioncard">
+          <div className="phonecardhead"><small>SMART ACTION CENTER</small><span><Zap/></span></div>
+          <h4>Your next action</h4>
+          <p>Add a real customer signal to see what deserves attention next.</p>
+          <div className="phonebutton">+ Capture signal</div>
+        </div>
+        <div className="phoneinsight"><div><small>GROWTH JOURNEY</small><b>0%</b></div><div className="phonebar"><i/></div></div>
+        <div className="phonebottom"><Home/><Users/><span><Plus/></span><Target/><MoreHorizontal/></div>
+      </div>
+    </div>
+    <div className="phone-reflection"/>
+    <div className="phone-glow-ring"/>
+  </div>
+}
+function Auth({mode,setMode,onBack}:{mode:'login'|'signup';setMode:(m:'login'|'signup')=>void;onBack:()=>void}){const appearance={theme:'simple',variables:{colorPrimary:'#19a974',colorForeground:'#111111',colorBackground:'#ffffff',borderRadius:'14px'}};return <div className="authpage"><button className="backland" onClick={()=>{sessionStorage.removeItem('signaldesk_auth_intent');onBack()}}>← SignalDesk</button><div className="authcard clerk-auth-card"><div className="authbrand"><SignalMark className="brandmark"/><b>SignalDesk</b></div><div className="sectiontag">{mode==='signup'?'EARLY ACCESS':'WELCOME BACK'}</div><h1>{mode==='signup'?'Build a calmer business workspace.':'Welcome back.'}</h1><p>{mode==='signup'?'Create your private workspace. Your data starts completely empty.':'Sign in to your private SignalDesk workspace.'}</p>{mode==='signup'?<SignUp routing="hash" forceRedirectUrl="/#/" signInUrl="/#/" signInForceRedirectUrl="/#/" appearance={appearance}/>:<SignIn routing="hash" forceRedirectUrl="/#/" signUpUrl="/#/" signUpForceRedirectUrl="/#/" appearance={appearance}/>}<button className="switchauth" onClick={()=>{sessionStorage.setItem('signaldesk_auth_intent','1');setMode(mode==='signup'?'login':'signup')}}>{mode==='signup'?'Already have an account? Log in':'New to SignalDesk? Create your account'}</button></div></div>}
