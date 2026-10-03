@@ -30,6 +30,8 @@ function AnimatedNumber({value}:{value:string|number}){const target=String(value
 const Stat=({label,value,icon}:{label:string;value:string|number;icon:React.ReactNode})=><div className="stat"><span className="staticon">{icon}</span><small>{label}</small><strong><AnimatedNumber value={value}/></strong><em>Workspace data</em></div>;
 const PanelHead=({label,title}:{label:string;title:string})=><div className="panelhead"><div><small>{label}</small><h3>{title}</h3></div></div>;
 
+function LoadingScreen({label,detail,retry}:{label:string;detail:string;retry?:()=>void}){return <div className="authpage"><div className="authcard" style={{textAlign:'center'}}><div className="authbrand"><span className="brandmark">S</span><b>SignalDesk</b></div><div className="sectiontag">SIGNALDESK</div><h1>{label}</h1><p>{detail}</p>{retry&&<button className="primary full big" onClick={retry}>Retry</button>}</div></div>}
+
 function App(){
  const {isLoaded,isSignedIn,getToken,signOut}=useAuth();
  const {user:clerkUser}=useUser();
