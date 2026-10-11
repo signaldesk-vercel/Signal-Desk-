@@ -286,6 +286,20 @@ function Landing({onStart,onLogin}:{onStart:()=>void;onLogin:()=>void}) {
       </div>
     </section>
 
+    <section className="landsection trial-extension-v1">
+      <div className="sectiontag">MORE TIME TO FIND YOUR FLOW</div>
+      <div className="section-heading-v28"><div><h2>Try SignalDesk. <em>Experience the difference.</em></h2><p className="sectionlead">Start with 7 days of completely free access — no credit card required. Share your honest feedback and get an additional 21 days to explore SignalDesk.</p></div><span className="section-index">7 + 21 DAYS</span></div>
+      <div className="trialcards-v28">
+        <div><span>01</span><b>7 days free</b><p>Explore SignalDesk with full feature access. No card details needed to get started.</p></div>
+        <div><span>02</span><b>Get 21 extra days</b><p>Share your feedback and unlock an additional 21 days of full access.</p></div>
+        <div><span>03</span><b>28 days to explore</b><p>Try the complete workspace before deciding whether SignalDesk Pro is right for you.</p></div>
+      </div>
+      <div style={{display:'flex',justifyContent:'center',marginTop:28}}>
+        <button className="primary big" onClick={()=>beginAuth('signup')}>Start your free trial <ChevronRight/></button>
+      </div>
+      <p style={{textAlign:'center',fontSize:13,opacity:.72,marginTop:12}}>No credit card required. Feedback is optional; the extra 21 days are for users who share it.</p>
+    </section>
+
     <section className="motionband-v28">
       <div className="motion-video-card"><video autoPlay muted loop playsInline preload="metadata" aria-hidden="true"><source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4"/></video><div className="motion-shade"/><div className="motion-copy"><span>REAL WORK · LESS FRICTION</span><h2>A business workspace that feels alive, not overloaded.</h2><p>Quiet surfaces, focused actions and motion that guides attention without getting in the way.</p></div></div>
     </section>
