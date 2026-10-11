@@ -27,7 +27,7 @@ function Bootstrap(){
         return data;
       })
       .then(r=>{
-        const k=r.data?.publishableKey;
+        const k=r.publishableKey||r.data?.publishableKey;
         if(active&&k)setKey(k);
         else if(active)setError('Clerk authentication is not configured yet.');
       })
