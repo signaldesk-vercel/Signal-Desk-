@@ -217,8 +217,8 @@ function Landing({onStart,onLogin}:{onStart:()=>void;onLogin:()=>void}) {
   return <div className="landing landing-v28">
     <nav className="landnav landnav-v28">
       <div className="landbrand"><SignalMark className="brandmark"/><b>SignalDesk</b></div>
-      <div className="landlinks"><a href="#how">How it works</a><a href="#features">Features</a><a href="#trial">7-day trial</a><a href="#faq">FAQ</a></div>
-      <div className="landnavactions"><span className="trial-nav-pill">7 DAYS TO EXPLORE</span><button className="landlogin" onClick={()=>beginAuth('login')}>Log in</button><button className="primary" onClick={()=>beginAuth('signup')}>Start 7-day trial <ChevronRight/></button></div>
+      <div className="landlinks"><a href="#how">How it works</a><a href="#features">Features</a><a href="#trial">Free access</a><a href="#faq">FAQ</a></div>
+      <div className="landnavactions"><span className="trial-nav-pill">7 DAYS FREE · NO CARD</span><button className="landlogin" onClick={()=>beginAuth('login')}>Log in</button><button className="primary" onClick={()=>beginAuth('signup')}>Start 7-day trial <ChevronRight/></button></div>
     </nav>
 
     <section id="trial" className="landhero hero-v29">
@@ -234,11 +234,11 @@ function Landing({onStart,onLogin}:{onStart:()=>void;onLogin:()=>void}) {
       <span className="hero-leaf leaf-r2" aria-hidden="true"/>
       <span className="hero-leaf leaf-r3" aria-hidden="true"/>
       <div className="hero-copy hero-copy-v29">
-        <div className="eyebrow"><span/> 7-DAY TRIAL · PRIVATE WORKSPACE</div>
+        <div className="eyebrow"><span/> FREE ACCESS · NO CREDIT CARD REQUIRED</div>
         <h1>Business feels lighter when the <em>next move is clear.</em></h1>
         <p>Bring conversations, actions, money and growth into one calm workspace — so the work feels easier to understand and act on.</p>
         <div className="hero-ctas">
-          <button className="primary big" onClick={()=>beginAuth('signup')}>Start your 7-day trial <ChevronRight/></button>
+          <button className="primary big" onClick={()=>beginAuth('signup')}>Start free access <ChevronRight/></button>
           <button className="ghost big" onClick={()=>scrollTo('how')}><Play/> See how it works</button>
         </div>
         <span className="hero-note-v29"><ShieldCheck/> Private workspace · Starts with your real data</span>
@@ -262,7 +262,7 @@ function Landing({onStart,onLogin}:{onStart:()=>void;onLogin:()=>void}) {
     </section>
 
     <section id="features" className="featureband featureband-v28">
-      <div><div className="sectiontag">WHAT YOU CAN DO</div><h2>Less switching.<br/><em>More knowing.</em></h2><p>Each part of SignalDesk is connected to the same business context — so the product feels like one workspace, not ten disconnected tools.</p><button className="primary big" onClick={()=>beginAuth('signup')}>Try it for 7 days <ChevronRight/></button></div>
+      <div><div className="sectiontag">WHAT YOU CAN DO</div><h2>Less switching.<br/><em>More knowing.</em></h2><p>Each part of SignalDesk is connected to the same business context — so the product feels like one workspace, not ten disconnected tools.</p><button className="primary big" onClick={()=>beginAuth('signup')}>Start free access <ChevronRight/></button></div>
       <div className="featuregrid featuregrid-v28">
         {[
           ['Customer intelligence','See the customer context behind the conversation.'],
@@ -277,12 +277,12 @@ function Landing({onStart,onLogin}:{onStart:()=>void;onLogin:()=>void}) {
 
     <section className="landsection trialstory-v28">
       <div className="sectiontag">WHY START WITH A TRIAL?</div>
-      <h2>Seven days is enough to make the workflow feel real.</h2>
+      <h2>Start with 7 days. Get 21 more with feedback.</h2>
       <p className="sectionlead">Do not build a perfect system first. Bring one real customer signal, one conversation or one business note into SignalDesk and let the workspace grow from there.</p>
       <div className="trialcards-v28">
         <div><span>01</span><b>Bring one real signal</b><p>Start with the thing currently sitting in your inbox, notes or messages.</p></div>
         <div><span>02</span><b>See the next action</b><p>Turn context into a clearer priority, reply or follow-up.</p></div>
-        <div><span>03</span><b>Build the habit</b><p>Use the workspace for seven days and see what becomes easier.</p></div>
+        <div><span>03</span><b>Build the habit</b><p>Use the workspace for seven days, share feedback, and keep exploring for 21 more.</p></div>
       </div>
     </section>
 
@@ -306,11 +306,11 @@ function Landing({onStart,onLogin}:{onStart:()=>void;onLogin:()=>void}) {
 
     <section id="faq" className="landsection faq faq-v28">
       <div className="sectiontag">FAQ</div><h2>Simple answers before you start.</h2>
-      {['What is included in the 7-day trial?','Will my workspace contain demo data?','What can I drop into SignalDesk?','What happens after the trial?'].map((q,i)=><button className="faqrow faqrow-v28" key={q} onClick={()=>setFaq(faq===i?null:i)}><div><b>{q}</b>{faq===i&&<p>{i===0?'You can explore the SignalDesk workflow with your own business context during the 7-day trial.':i===1?'No. New workspaces start empty. Only information you add, import or connect is used to build your workspace.':i===2?'You can add customer conversations, meeting notes, transcripts and supported documents or spreadsheets.':'Paddle shows the applicable billing and renewal terms in checkout before you confirm the subscription.'}</p>}</div><span>{faq===i?'−':'+'}</span></button>)}
+      {['How does the free access work?','Will my workspace contain demo data?','What can I drop into SignalDesk?','What happens after the free access period?'].map((q,i)=><button className="faqrow faqrow-v28" key={q} onClick={()=>setFaq(faq===i?null:i)}><div><b>{q}</b>{faq===i&&<p>{i===0?'You get 7 days of full access without a card. Share feedback during that period to unlock another 21 days of full access.':i===1?'No. New workspaces start empty. Only information you add, import or connect is used to build your workspace.':i===2?'You can add customer conversations, meeting notes, transcripts and supported documents or spreadsheets.':'Your free access ends after 7 days unless you share feedback to unlock the additional 21 days. After that, choose whether to subscribe to SignalDesk Pro; checkout shows the applicable billing terms before you confirm.'}</p>}</div><span>{faq===i?'−':'+'}</span></button>)}
     </section>
 
     <section className="landsection landfinal landfinal-v28">
-      <div><div className="sectiontag">YOUR NEXT 7 DAYS</div><h2>Start with the business you have today.</h2><p>Bring one real signal into SignalDesk and see what becomes clearer.</p></div>
+      <div><div className="sectiontag">YOUR FIRST 7 DAYS</div><h2>Start with the business you have today.</h2><p>Bring one real signal into SignalDesk. Share feedback to unlock 21 additional days of full access.</p></div>
       <button className="primary big" onClick={()=>beginAuth('signup')}>Start 7-day trial <ChevronRight/></button>
     </section>
     <footer className="landfooter landfooter-v28"><div><b>SignalDesk</b><span>DROP → UNDERSTAND → ACT</span></div><span>Turn real business signals into clear next actions.</span><span>Built by Nexagen Studio</span></footer>
