@@ -24,12 +24,19 @@ async function currentUser(body:any,req:VercelRequest){
   const email=cu.primaryEmailAddress?.emailAddress||'';
   const {data:existing}=await supabase.from('clerk_users').select('*').eq('clerk_id',id).maybeSingle();
   if(existing){
-   if(existing.name!==name||existing.email!==email) await supabase.from('clerk_users').update({name,email,updated_at:new Date().toISOString()}).eq('clerk_id',id);
-   return {...existing,name,email};
+   const now=new Date();
+   const trialStarted=existing.trial_started_at||now.toISOString();
+   const trialUntil=existing.trial_access_until||new Date(new Date(trialStarted).getTime()+7*86400000).toISOString();
+   const patch:any={name,email,updated_at:now.toISOString()};
+   if(!existing.trial_started_at)patch.trial_started_at=trialStarted;
+   if(!existing.trial_access_until)patch.trial_access_until=trialUntil;
+   if(existing.name!==name||existing.email!==email||!existing.trial_started_at||!existing.trial_access_until)await supabase.from('clerk_users').update(patch).eq('clerk_id',id);
+   return {...existing,...patch,name,email,trial_started_at:trialStarted,trial_access_until:trialUntil};
   }
   const {data:ws,error:we}=await supabase.from('workspaces').insert({name:'My SignalDesk workspace'}).select().single();
   if(we||!ws)return null;
-  const {data:u,error:ue}=await supabase.from('clerk_users').insert({clerk_id:id,name,email,workspace_id:ws.id,currency:'USD'}).select().single();
+  const started=new Date();
+  const {data:u,error:ue}=await supabase.from('clerk_users').insert({clerk_id:id,name,email,workspace_id:ws.id,currency:'USD',trial_started_at:started.toISOString(),trial_access_until:new Date(started.getTime()+7*86400000).toISOString()}).select().single();
   if(ue||!u)return null;
   return u;
  }catch{return null}
@@ -74,7 +81,32 @@ export default async function handler(req:VercelRequest,res:VercelResponse){
  if(path==='/api/billing/config'){const u=await okUser(body,req,res);if(!u)return;return billingConfig(res)}
  if(path==='/api/billing/validate'){const u=await okUser(body,req,res);if(!u)return;return paddleValidate(res)}
  const u=await okUser(body,req,res);if(!u)return;
+ if(path==='/api/trial/status'){
+  const {data:subRows}=await supabase.from('billing_subscriptions').select('status').eq('workspace_id',u.workspace_id).order('updated_at',{ascending:false}).limit(1);
+  const paid=Boolean(subRows?.[0]&&['active','trialing'].includes(String(subRows[0].status)));
+  const started=String(u.trial_started_at||new Date().toISOString()),until=String(u.trial_access_until||new Date(Date.now()+7*86400000).toISOString());
+  const remaining=Math.max(0,Math.ceil((new Date(until).getTime()-Date.now())/86400000));
+  return send(res,200,{startedAt:started,accessUntil:until,feedbackSubmitted:Boolean(u.feedback_submitted_at),feedbackSubmittedAt:u.feedback_submitted_at||null,paid,active:paid||Date.now()<new Date(until).getTime(),daysRemaining:remaining,feedbackEligible:!u.feedback_submitted_at&&Date.now()<=new Date(started).getTime()+7*86400000});
+ }
+ if(path==='/api/trial/feedback'){
+  const feedback=String(body.feedback||'').trim();
+  if(feedback.length<10||feedback.length>2000)return send(res,400,{message:'Please enter feedback between 10 and 2,000 characters.'});
+  if(u.feedback_submitted_at)return send(res,409,{message:'Feedback has already been submitted for this trial.'});
+  const started=new Date(String(u.trial_started_at||Date.now()));
+  if(Date.now()>started.getTime()+7*86400000)return send(res,410,{message:'The first 7-day feedback window has ended.'});
+  const submitted=new Date().toISOString(),extendedUntil=new Date(started.getTime()+28*86400000).toISOString();
+  const {data:updated,error}=await supabase.from('clerk_users').update({feedback_text:feedback,feedback_submitted_at:submitted,trial_access_until:extendedUntil,updated_at:submitted}).eq('clerk_id',u.clerk_id).is('feedback_submitted_at',null).select('trial_access_until,feedback_submitted_at').maybeSingle();
+  if(error)return send(res,500,{message:'Could not save feedback. Please try again.'});
+  if(!updated)return send(res,409,{message:'Feedback has already been submitted for this trial.'});
+  return send(res,200,{ok:true,feedbackSubmittedAt:updated.feedback_submitted_at,accessUntil:updated.trial_access_until,daysRemaining:Math.max(0,Math.ceil((new Date(updated.trial_access_until).getTime()-Date.now())/86400000))});
+ }
  if(path==='/api/workspace'){const [c,co,t]=await Promise.all([supabase.from('customers').select('*').eq('workspace_id',u.workspace_id),supabase.from('conversations').select('*').eq('workspace_id',u.workspace_id).order('created_at',{ascending:false}),supabase.from('transactions').select('*').eq('workspace_id',u.workspace_id).order('date',{ascending:false})]);return send(res,200,{user:{id:u.clerk_id,name:u.name,email:u.email,workspaceId:u.workspace_id,currency:u.currency},customers:(c.data||[]).map(x=>({...x,workspaceId:x.workspace_id})),conversations:(co.data||[]).map(x=>({...x,workspaceId:x.workspace_id, time:x.time||'Just now'})),transactions:(t.data||[]).map(x=>({...x,workspaceId:x.workspace_id}))})}
+ if(path!=='/api/workspace'&&path!=='/api/profile'&&path!=='/api/billing/status'&&!path.startsWith('/api/trial/')){
+  const {data:subs}=await supabase.from('billing_subscriptions').select('status').eq('workspace_id',u.workspace_id).order('updated_at',{ascending:false}).limit(1);
+  const paid=Boolean(subs?.[0]&&['active','trialing'].includes(String(subs[0].status)));
+  const until=new Date(String(u.trial_access_until||0)).getTime();
+  if(!paid&&(!Number.isFinite(until)||Date.now()>=until))return send(res,403,{code:'TRIAL_EXPIRED',message:'Your free access has ended. Subscribe to SignalDesk Pro to unlock workspace features.'});
+ }
  if(path==='/api/profile'){const currency=String(body.currency||'USD');if(!['USD','LKR','EUR','GBP'].includes(currency))return send(res,400,{message:'Unsupported currency'});await supabase.from('clerk_users').update({currency,updated_at:new Date().toISOString()}).eq('clerk_id',u.clerk_id);return send(res,200,{ok:true,currency})}
  if(path==='/api/customers'){const name=String(body.name||'').trim();if(!name)return send(res,400,{message:'Customer name is required'});const row={workspace_id:u.workspace_id,name,email:String(body.email||''),status:'New',value:0,initials:name.split(/\s+/).slice(0,2).map((x:string)=>x[0]).join('').toUpperCase()};const {data,error}=await supabase.from('customers').insert(row).select().single();if(error)return send(res,500,{message:error.message});return send(res,200,{customer:{...data,workspaceId:data.workspace_id}})}
  if(path==='/api/transactions'){const amount=Number(body.amount);if(!Number.isFinite(amount)||amount<=0||!['income','expense'].includes(body.type)||!String(body.label||'').trim())return send(res,400,{message:'Valid amount, type and description are required'});const row={workspace_id:u.workspace_id,type:body.type,label:String(body.label).trim(),amount,date:String(body.date||new Date().toISOString().slice(0,10))};const {data,error}=await supabase.from('transactions').insert(row).select().single();if(error)return send(res,500,{message:error.message});return send(res,200,{transaction:{...data,workspaceId:data.workspace_id}})}
