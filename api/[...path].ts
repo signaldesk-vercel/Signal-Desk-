@@ -74,7 +74,7 @@ async function paddleWebhook(req:VercelRequest,res:VercelResponse){
  return send(res,200,{ok:true});
 }
 export default async function handler(req:VercelRequest,res:VercelResponse){
- const requestPath=String(req.url||'/').split('?')[0];const queryParts=Array.isArray(req.query.path)?req.query.path.join('/'):String(req.query.path||'');const queryPath='/'+queryParts.replace(/^\\/+|\\/+$/g,'');const rawPath=requestPath.startsWith('/api/')?requestPath.replace(/\\/+$/,''):(queryPath.startsWith('/api/')?queryPath:'/api'+queryPath);const path=rawPath||'/api';const body:any=req.body||{};
+ const requestPath=String(req.url||'/').split('?')[0];const queryParts=Array.isArray(req.query.path)?req.query.path.join('/'):String(req.query.path||'');const queryPath='/'+queryParts.replace(/^\/+|\/+$/g,'');const rawPath=requestPath.startsWith('/api/')?requestPath.replace(/\/+$/,''):(queryPath.startsWith('/api/')?queryPath:'/api'+queryPath);const path=rawPath||'/api';const body:any=req.body||{};
  if(path==='/api/auth/config')return send(res,200,{publishableKey:process.env.CLERK_PUBLISHABLE_KEY||''});
  if(path==='/api/billing/webhook')return paddleWebhook(req,res);
  if(req.method!=='POST')return send(res,405,{message:'Method not allowed'});
